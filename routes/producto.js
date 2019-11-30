@@ -1,7 +1,6 @@
 const express = require('express');
-const _ = require('underscore');
 const app = express();
-
+const _ = require('underscore');
 const Producto = require('../models/producto');
 
 app.get('/producto', (req, res) => {
@@ -29,10 +28,9 @@ app.post('/producto', (req, res) => {
         precioUni: body.precioUni,
         categoria: body.categoria,
         usuario: body.usuario
-
     });
 
-    producto.save((err, productDB) => {
+    producto.save((err, produDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -41,30 +39,31 @@ app.post('/producto', (req, res) => {
         }
         return res.status(200).json({
             ok: true,
-            productDB
+            produDB
         });
-
     });
-
 });
+
 
 app.put('/producto/:id', (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'precioUni', 'categoria', 'disponible', 'usuario']);
 
-    Producto.findByIdAndUpdate(id, body, { new: true, runValidators: true, context: 'query' }, (err, productDB) => {
+    Producto.findByIdAndUpdate(id, body, { new: true, runValidators: true, context: 'query' }, (err, usrDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
                 err
             });
+        } else {
+            return res.status(200).json({
+                ok: true,
+                usrDB
+            });
         }
-        return res.status(200).json({
-            ok: true,
-            productDB
-        });
     });
 });
+
 app.delete('/producto/:id', (req, res) => {
     let id = req.params.id;
     // Usuario.deleteOne({ _id: id }, (err, resp) => {
@@ -102,5 +101,6 @@ app.delete('/producto/:id', (req, res) => {
         });
     });
 });
+
 
 module.exports = app;

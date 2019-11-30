@@ -1,13 +1,11 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const _ = require('underscore');
 const app = express();
+const _ = require('underscore');
+const Categoria = require('../models/categoria');
 
-const Usuario = require('../models/usuario');
-
-app.get('/usuario', (req, res) => {
-    Usuario.find({ estado: true })
-        .exec((err, usuarios) => {
+app.get('/categoria', (req, res) => {
+    Categoria.find({ disponible: true })
+        .exec((err, categorias) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -16,24 +14,21 @@ app.get('/usuario', (req, res) => {
             }
             return res.status(200).json({
                 ok: true,
-                count: usuarios.length,
-                usuarios
+                count: categorias.length,
+                categorias
             })
         });
 });
 
-
-app.post('/usuario', (req, res) => {
+app.post('/categoria', (req, res) => {
     let body = req.body;
 
-    let usuario = new Usuario({
+    let categoria = new Categoria({
         nombre: body.nombre,
-        email: body.email,
-        password: bcrypt.hashSync(body.password, 10),
-        img: body.img
+        usuario: body.usuario
     });
 
-    usuario.save((err, usrDB) => {
+    categoria.save((err, catDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -42,33 +37,33 @@ app.post('/usuario', (req, res) => {
         }
         return res.status(200).json({
             ok: true,
-            usrDB
+            catDB
         });
-
     });
 });
 
-app.put('/usuario/:id', (req, res) => {
+app.put('/categoria/:id', (req, res) => {
     let id = req.params.id;
-    let body = _.pick(req.body, ['nombre', 'estado', 'role', 'img']);
+    let body = _.pick(req.body, ['nombre', 'usuario']);
 
-    Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true, context: 'query' }, (err, usrDB) => {
+    Categoria.findByIdAndUpdate(id, body, { new: true, runValidators: true, context: 'query' }, (err, catDB) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
                 err
             });
+        } else {
+            return res.status(200).json({
+                ok: true,
+                catDB
+            });
         }
-        return res.status(200).json({
-            ok: true,
-            usrDB
-        });
     });
 });
 
-app.delete('/usuario/:id', (req, res) => {
+app.delete('/categoria/:id', (req, res) => {
     let id = req.params.id;
-    // Usuario.deleteOne({ _id: id }, (err, resp) => {
+    // Categoria.deleteOne({ _id: id }, (err, resp) => {
     //     if (err) {
     //         return res.status(400).json({
     //             ok: false,
@@ -80,7 +75,7 @@ app.delete('/usuario/:id', (req, res) => {
     //             ok: false,
     //             err: {
     //                 id,
-    //                 msg: 'Usuario no encontrado'
+    //                 msg: 'Categoria no encontrada'
     //             }
     //         });
     //     }
@@ -90,7 +85,7 @@ app.delete('/usuario/:id', (req, res) => {
     //     });
 
     // });
-    Usuario.findByIdAndUpdate(id, { estado: false }, { new: true, runValidators: true, context: 'query' }, (err, resp) => {
+    Categoria.findByIdAndUpdate(id, { disponible: false }, { new: true, runValidators: true, context: 'query' }, (err, resp) => {
         if (err) {
             return res.status(400).json({
                 ok: false,
@@ -103,5 +98,6 @@ app.delete('/usuario/:id', (req, res) => {
         });
     });
 });
+
 
 module.exports = app;
